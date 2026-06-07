@@ -24,7 +24,7 @@ Official university channels provide sanitized, idealized information (e.g., glo
 
 | # | Source | Type | URL or file path |
 |---|--------|------|-----------------|
-| 1 |r/rutgers, "WARNING for Rutgers Students: Think Twice Before Renting at The Standard | Trapped in elevator, mold, water leaks from ceilings, HIDDEN ISSUES that they may CHARGE YOU FOR + off campus housing tips." | Reddit discussion |https://www.reddit.com/r/rutgers/comments/14butcp/warning_for_rutgers_students_think_twice_before/|
+| 1 |r/rutgers, "WARNING for Rutgers Students: Think Twice Before Renting at The Standard. Trapped in elevator, mold, water leaks from ceilings, HIDDEN ISSUES that they may CHARGE YOU FOR + off campus housing tips." | Reddit discussion |https://www.reddit.com/r/rutgers/comments/14butcp/warning_for_rutgers_students_think_twice_before/|
 | 2 |r/rutgers, "The RU Screw Is Coming for Adjunct Professors Again and Messing Things Up for Students" | Reddit discussion | https://www.reddit.com/r/rutgers/comments/1rs591k/the_ru_screw_is_coming_for_adjunct_professors/|
 | 3 |r/rutgers, "new bus route just dropped!!!" | Reddit discussion |https://www.reddit.com/r/rutgers/comments/1i2q3fe/new_bus_route_just_dropped/|
 | 4 |r/rutgers, "PSA: Don’t unplug other people’s cars while it’s charging" | Reddit discussion |https://www.reddit.com/r/rutgers/comments/1sbr92n/psa_dont_unplug_other_peoples_cars_while_its/|

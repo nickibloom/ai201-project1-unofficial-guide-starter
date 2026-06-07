@@ -121,7 +121,7 @@ Source attribution is handled directly via structural markdown injection within 
 
 Because we are utilizing Gradio's native Markdown rendering engine inside the chat bubbles, the backend prediction loop will format every output into two distinct, structured zones.
 
-While synthesizing the answer, the LLM will append inline anchors directly behind key sentences—for example: "...maintenance issues like black mold were rampant [1]."
+While synthesizing the answer, the LLM will append inline anchors directly behind key sentences, for example: "...maintenance issues like black mold were rampant [1]."
 
 At the very bottom of the generated text block, a clear horizontal rule boundary will be drawn, followed by a mapped references list utilizing the parsed metadata (source_url and post_title) tied directly to the indexed ChromaDB chunk:
 

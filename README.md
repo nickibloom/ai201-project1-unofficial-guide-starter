@@ -138,14 +138,16 @@ At the very bottom of the generated text block, a clear horizontal rule boundary
 
 | # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
 |---|----------|-----------------|------------------------------|-------------------|-------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | What specific maintenance issues did students face at The Standard off-campus apartments? | Severe mold, water leaks, elevator failures, and hidden fees from predatory leasing. | Listed mold, water leaks from ceilings, and being trapped in the elevator; flagged the "HIDDEN ISSUES that they may CHARGE YOU FOR" fee warning and noted the fire department is a frequent visitor. | Relevant — all 3 chunks from the correct thread (dist 0.35–0.40). | Accurate — captured every expected issue with grounded citations. |
+| 2 | What are students complaining about regarding EV charging stations on campus? | Students unplug others' EVs mid-charge, violating charging etiquette. | Explained that people unplug EVs mid-charge (cited a Tesla unplugged after 14 min / +1%), declining commuter courtesy, too few chargers, and that it may count as criminal mischief reportable to RUPD. | Partially relevant — only the rank-2 chunk was the correct EV thread (0.54); ranks 1 and 3 were off-target housing-thread chunks. | Accurate — the model correctly grounded on the single relevant chunk and ignored the off-target ones. |
+| 3 | Why are students upset about upcoming administrative budget cuts and how does it affect faculty? | Cuts target adjunct professors, sparking backlash ("The RU Screw"); hurts faculty support. | Explained adjuncts teach ~1/3 of undergrad classes for <1% of budget, dozens face layoffs (~100 classes), threatening time-to-degree; cited Math/CS unfilled positions and the Athletic Dept's $500M debt as an unfair contrast. | Relevant — all 3 chunks from the correct "RU Screw" thread (dist 0.36–0.46). | Accurate — strongly matches; richer detail than expected, minus an explicit "tuition hikes" mention. |
+| 4 | What advice or perspective do graduates give about finding a job with a Rutgers supply chain degree? | Brutal entry market, salary imposter syndrome; compares Newark vs. New Brunswick networking pipelines. | Advised taking "shit roles" for experience, upskilling (data/AI certs), persistence ("first job, not your last"), and noted you can list "Rutgers University" without specifying the campus. | Relevant — all 3 chunks from the correct thread (best retrieval, dist 0.31–0.37). | Partially accurate — solid grounded advice, but lighter on the salary-gaslighting and Newark-vs-NB networking-pipeline angle the expected answer emphasized. |
+| 5 | How do students counter the negative stereotypes about the Rutgers-Camden campus? | Tight-knit community, smaller class sizes, closer faculty access. | Highlighted smaller class sizes / personalized learning, flexible willing professors, campus diversity and community, and feeling safe commuting/walking around. | Partially relevant — top 2 chunks came from the general "Rutgers is a great school" thread; the dedicated "Is Camden really that bad?" thread only ranked 3rd. | Accurate — themes (small classes, community, faculty access) align with the expected answer. |
 
 **Retrieval quality:** Relevant / Partially relevant / Off-target  
 **Response accuracy:** Accurate / Partially accurate / Inaccurate
+
+**Summary:** 3 of 5 questions retrieved cleanly from the correct thread (Q1, Q3, Q4); Q2 and Q5 showed the "comment drift / shared-vocabulary" retrieval weakness predicted in planning.md — the correct source ranked 2nd or 3rd behind topically-overlapping chunks. Despite that, all 5 answers stayed accurate and grounded, because the LLM drew from the relevant retrieved chunk and ignored the off-target ones. Q4 is the only partial on accuracy: the advice is correct but underweights the regional-campus networking comparison the expected answer stressed. This pattern (weak top-1 retrieval on slang-heavy / overlapping topics, yet accurate generation) directly supports the embedding-model upgrade argued for in the Retrieval Approach reflection.
 
 ---
 
@@ -197,8 +199,69 @@ At the very bottom of the generated text block, a clear horizontal rule boundary
 **Instance 1**
 
 - *What I gave the AI:*
+
+I gave Claude my planning.md file along with the following prompt:
+
+I am working on Milestone 3 (Ingestion and Chunking) for my Unoffical Guide RAG application. 
+
+Please write a robust Python ingestion script based on the following specifications:
+
+1. TARGET URLS:
+Here is the list of 10 target r/rutgers Reddit threads I need to fetch data from:
+- https://www.reddit.com/r/rutgers/comments/14butcp/warning_for_rutgers_students_think_twice_before/
+- https://www.reddit.com/r/rutgers/comments/1rs591k/the_ru_screw_is_coming_for_adjunct_professors/
+- https://www.reddit.com/r/rutgers/comments/1i2q3fe/new_bus_route_just_dropped/
+- https://www.reddit.com/r/rutgers/comments/1sbr92n/psa_dont_unplug_other_peoples_cars_while_its/
+- https://www.reddit.com/r/rutgers/comments/1s3ovg9/graduated_from_rutgers_with_a_supply_chain_degree/
+- https://www.reddit.com/r/rutgers/comments/1srwn8j/genuinely_about_to_fail_35_of_my_classes/
+- https://www.reddit.com/r/rutgers/comments/1somr5w/cheating_in_class/
+- https://www.reddit.com/r/rutgers/comments/1jekoj8/is_camden_really_that_bad/
+- https://www.reddit.com/r/rutgers/comments/1n7oapr/stop_packing_up_before_the_lectures_over/
+- https://www.reddit.com/r/rutgers/comments/1q1l81y/rutgers_is_a_great_school/
+
+2. WORKAROUND & REQUEST CONSTRAINTS:
+- Loop through these URLs and append `.json` to the end of them to request raw data.
+- Include a custom `User-Agent` header (e.g., 'RutgersRAGApp/1.0 by Student') so Reddit does not return a 429 error.
+- Add a tiny time delay (e.g., `time.sleep(2)`) between requests to be respectful of the endpoint.
+
+3. DATA PARSING & FLATTENING LOGIC:
+- Reddit's thread JSON structure returns a list containing two main elements: index [0] is the parent post data, and index [1] is the recursive comment tree.
+- Extract the main post details: `title`, `selftext` (post body), and the `url` (permalink).
+- Create a recursive function to walk down the nested comment tree array (`replies -> data -> children`). 
+- Flatten all comments into a plain conversational text stream.
+- Noise Filtering: Strip out any comments where the author is "AutoModerator", or where the body is literally "[deleted]" or "[removed]".
+
+4. OUTPUT FORMAT:
+- For each thread, save a clean JSON file in a directory named `raw_data/`.
+- The saved JSON file should have a structured layout like this:
+  {
+    "post_title": "...",
+    "source_url": "...",
+    "flattened_content": "Post Title: ... \nPost Body: ... \nComment by user1: ... \nComment by user2: ..."
+  }
+
 - *What it produced:*
+
+Claude created the ingest.py script and responded with the following message:
+
+The script ran end-to-end and handled everything gracefully — but 0/10 threads saved, all 403 Blocked. I dug into the root cause, and it's not your code:
+
+Test	Result
+example.com (control)	✅ 200
+reddit.com homepage	❌ 403
+r/rutgers/about.json	❌ 403
+oauth.reddit.com	❌ 403 (network-security block page)
+r.jina.ai proxy → Reddit	❌ Reddit returns "blocked by network security"
+Reddit OAuth token endpoint	⚠️ 401 (reachable, needs credentials)
+Since even Reddit's homepage returns 403 from here while example.com works, this environment's egress IP (74.105.190.146) is blocked by Reddit at the network edge. Browser User-Agent, full sec-* headers, old.reddit.com, and a fetch-proxy all hit the same wall. This is Reddit's broad anti-scraping enforcement — unauthenticated .json access is largely dead now, and this IP is flagged.
+
+The one promising signal: the OAuth token endpoint is reachable (returned 401, not a block page). Authenticated requests are treated differently from anonymous ones, so the official API is the robust path forward — but it needs a developer token.
+
+How would you like to proceed?
+
 - *What I changed or overrode:*
+
+I pivoted to manually retrieving the json versions of the webpages for the threads since there was no way to get the data via requests. I then instructed Claude to use the json dumps I had placed in the documents folder and create an ingestion and cleaning script for those instead.
 
 **Instance 2**
 

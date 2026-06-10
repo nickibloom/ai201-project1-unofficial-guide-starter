@@ -164,13 +164,21 @@ At the very bottom of the generated text block, a clear horizontal rule boundary
      "The embedding model treated the professor's nickname as out-of-vocabulary and returned
      results from an unrelated review" is an explanation. -->
 
-**Question that failed:**
+**Question that failed:** Q2 — "What are students complaining about regarding EV charging stations on campus?" (retrieval failure, not generation).
 
-**What the system returned:**
+**What the system returned:** The final answer was actually correct, but *retrieval ranked the wrong document first*. For top-k=3, the ranking was:
+- **[1] (dist 0.473)** — a chunk from the *housing* thread ("WARNING… The Standard") about apartment paperwork and "violations and health hazards." Completely unrelated to EV charging.
+- **[2] (dist 0.539)** — the actual EV thread ("PSA: Don't unplug other people's cars"), the correct source.
+- **[3] (dist 0.550)** — another off-topic housing chunk.
 
-**Root cause (tied to a specific pipeline stage):**
+So 2 of the 3 retrieved chunks were off-target, and the correct thread was beaten to the top spot by an unrelated document.
 
-**What you would change to fix it:**
+**Root cause (tied to a specific pipeline stage):** This is an embedding / retrieval failure (Stages 3–4), specifically a vocabulary mismatch in the `all-MiniLM-L6-v2` model — not a chunking or generation problem. The correct EV chunk never contains the formal query terms: it says "Tesla," "charger," "charging," "charging spaces" — never "EV," "electric vehicle," or "charging station." The query "EV charging stations… complaining… on campus" has two strong signals, and the lightweight model latched onto the wrong one: the generic "student complaining on campus" sentiment. The housing chunk is saturated with exactly that grievance vocabulary ("this post scared me," "don't let them treat you poorly," "violations and health hazards"), so it scored as semantically closer to a complaint-shaped query than the narrative EV post, which tells a calm story about a 14-minute charge. The model has shallow understanding of hyper-local/colloquial phrasing and can't reliably map "EV charging station" → "someone yanked my Tesla charger."
+
+**What you would change to fix it:** I would add a sparse keyword/BM25 score alongside the dense vector and fuse them. Lexical matching on "charging"/"unplug"/"charger" would immediately surface the EV thread regardless of the dense model's confusion over a "complaint"-shaped query.
+Or I would upgrade the embedding model to a larger one (e.g. BGE-large, E5, or `text-embedding-3-large`) with richer colloquial/domain understanding and a longer context window.
+
+It is worth noting the generation stage masked this failure: because the correct chunk still landed in the top-3 and the grounding prompt told the model to use only relevant context, the LLM ignored the two housing chunks and answered correctly. Had the correct chunk fallen to rank 4+, it would have been dropped from the context entirely and the answer would have failed outright. So, the retrieval weakness is real even though this particular response was accurate.
 
 ---
 
@@ -181,7 +189,11 @@ At the very bottom of the generated text block, a clear horizontal rule boundary
 
 **One way the spec helped you during implementation:**
 
+The planning doc's specificity turned each milestone into a near-executable contract rather than a vague goal. Because the Chunking Strategy already fixed the exact numbers (800–1,200 characters, 200-character overlap) and the per-milestone AI Tool Plan spelled out concrete details. The five-stage architecture diagram also mapped almost one-to-one onto the four scripts (`ingest.py` → `chunks.py` → `embed.py` → `app.py`), which kept the pipeline modular. The Anticipated Challenges section was especially valuable in hindsight: it predicted "comment drift" and topically-overlapping retrieval, so when Q2 and Q5 retrieved off-target chunks during evaluation, I already had the vocabulary to diagnose and explain the failure instead of being surprised by it.
+
 **One way your implementation diverged from the spec, and why:**
+
+The largest divergence was the entire data-acquisition method in Stage 1 (Ingestion). The spec called for a standalone script that fetches each thread programmatically by appending `.json` to the URL, sending a custom `User-Agent`, and sleeping between requests. I built that initially, but every request returned HTTP 403, and testing showed Reddit was blocking the network's egress IP at the edge (even reddit.com's homepage 403'd while other sites returned 200). Programmatic scraping was not possible, so I pivoted: the 10 threads were saved manually as raw JSON from a logged-in browser into `documents/json_dumps/`, and `ingest.py` was rewritten to read and parse those local files instead of making any HTTP calls, the `requests`/`User-Agent`/`time.sleep` logic was removed entirely while the parsing, flattening, and noise-filtering logic stayed identical to the spec.
 
 ---
 

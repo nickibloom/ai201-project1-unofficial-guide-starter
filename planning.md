@@ -161,7 +161,7 @@ Because the dataset contains general threads rather than perfectly clean, single
 =================================================================================================
 5. GENERATION            -->  [ Grounded Prompt Injection ] ➔ Strict context enforcement
                               ➔ Generate Response with Source Citations
-                              (Tools: Groq API [llama-3.3-70b-versatile] ➔ Streamlit Display)
+                              (Tools: Groq API [llama-3.3-70b-versatile] ➔ Gradio Display)
 =================================================================================================
 
 ---

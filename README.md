@@ -277,6 +277,14 @@ I pivoted to manually retrieving the json versions of the webpages for the threa
 
 **Instance 2**
 
-- *What I gave the AI:*
-- *What it produced:*
-- *What I changed or overrode:*
+- *What I gave the AI:* 
+
+I gave Claude my Chunking Strategy section and asked it to write a separate `chunks.py` that splits the flattened threads into 800–1,200 character chunks with ~200 character overlap. I specifically directed it to snap chunk boundaries to comment/line breaks so it would never cut through the middle of a comment.
+
+- *What it produced:* 
+
+It built `chunks.py`, which reads `raw_data/`, greedily packs whole comments into chunks (hard-splitting only a single comment that alone exceeds the max), and carries a ~200-char overlap forward. It output 152 chunks across the 10 threads, none over 1,200 characters, averaging ~1,020 — plus a verification report showing the size distribution and a sample overlap.
+
+- *What I changed or overrode:* 
+
+I scoped this step to chunking only and told Claude to defer the campus keyword-tagging from my spec for now. I also chose the boundary-snapping approach over a naive fixed-character split after Claude flagged that ~10 chunks fell under my 800 minimum. I accepted those smaller chunks as the deliberate tradeoff for keeping every comment intact.

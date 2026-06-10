@@ -14,6 +14,10 @@
      Example: "Student reviews of CS professors at [university] — useful because official
      course descriptions don't reflect teaching style, exam difficulty, or workload." -->
 
+Unfiltered student-generated knowledge from the Rutgers University community (r/rutgers), spanning housing pitfalls, academic integrity, regional campus realities, transit changes, and post-graduation job markets.
+
+Official university channels provide sanitized, idealized information (e.g., glossy housing brochures, high employment statistics, and rigid course catalogs). This "unofficial" community knowledge is valuable because it contains the unvarnished truth students need to survive, such as warnings about predatory off-campus apartments, the mental toll of course failure, and the actual reputation of regional campuses. It is impossible to find through official channels because universities do not document their own administrative shortcomings ("The RU Screw"), infrastructure flaws, or peer cheating cultures.
+
 ---
 
 ## Document Sources
@@ -66,6 +70,8 @@ A 200-character overlap acts as a semantic bridge. Since Reddit responses rely e
 Because we are dealing with diverse, drifting topics (e.g., a general thread where someone suddenly mentions a specific campus landmark like Newark's RBS or a New Brunswick bus route), this size is small enough to ensure high semantic density, yet large enough to contain the unique "trigger words" required for our chunk-level campus classification logic.
 
 **Final chunk count:**
+
+152 chunks across the 10 threads, none exceeding 1,200 characters and averaging ~1,020 characters. (Preprocessing before chunking: `ingest.py` parses the raw thread JSON, flattens the post and recursive comment tree into a single text stream, and strips noise — `AutoModerator`, `[deleted]`, and `[removed]` comments — before `chunks.py` splits it.)
 
 ---
 
